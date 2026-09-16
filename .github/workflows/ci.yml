@@ -8,9 +8,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
-  actions: read
-  copilot-requests: write
 
 jobs:
   build:
@@ -96,20 +93,3 @@ jobs:
           name: sbom
           path: artifacts/sbom-file/DesktopApplication.sbom.spdx.json
           if-no-files-found: error
-
-  orchestrate:
-    name: Analyze vendor updates
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    uses: defrances/Orchestrator/.github/workflows/orchestrate.yml@main
-    with:
-      sha: ${{ github.sha }}
-      ci_run_id: ${{ github.run_id }}
-    secrets:
-      ORCHESTRATOR_PAT: ${{ secrets.ORCHESTRATOR_PAT }}
-      COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
-    permissions:
-      contents: read
-      issues: write
-      actions: read
-      copilot-requests: write
