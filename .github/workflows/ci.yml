@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build, test, SBOM
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        run: dotnet restore DesktopApplication.sln
+
+      - name: Build
+        run: dotnet build DesktopApplication.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test DesktopApplication.sln -c Release --no-build --verbosity normal
+
+      - name: Publish Windows app
+        run: >
+          dotnet publish src/DesktopApplication/DesktopApplication.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          -o artifacts/app
+
+      - name: Install SBOM tool
+        run: dotnet tool restore
+
+      - name: Generate SBOM
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts/sbom | Out-Null
+          dotnet sbom-tool generate `
+            -b artifacts/app `
+            -bc src `
+            -pn DesktopApplication `
+            -pv 1.0.0 `
+            -ps DesktopApplication `
+            -nsb https://github.com/defrances/DesktopApplication `
+            -m artifacts/sbom
+
+      - name: Collect SBOM file
+        shell: pwsh
+        run: |
+          $sbom = Get-ChildItem -Path artifacts/sbom -Recurse -Filter *.spdx.json |
+            Select-Object -First 1
+          if (-not $sbom) {
+            throw "SBOM file was not generated."
+          }
+
+          New-Item -ItemType Directory -Force -Path artifacts/sbom-file | Out-Null
+          Copy-Item $sbom.FullName "artifacts/sbom-file/DesktopApplication.sbom.spdx.json"
+          Copy-Item $sbom.FullName "artifacts/app/DesktopApplication.sbom.spdx.json"
+
+          if (-not (Test-Path "artifacts/app/DesktopApplication.sbom.spdx.json")) {
+            throw "SBOM file is missing from application artifacts."
+          }
+
+          Write-Host "SBOM: $($sbom.FullName)"
+
+      - name: Upload application artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DesktopApplication-win-x64
+          path: artifacts/app/**
+          if-no-files-found: error
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: artifacts/sbom-file/DesktopApplication.sbom.spdx.json
+          if-no-files-found: error
