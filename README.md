@@ -49,3 +49,5 @@ Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 | `sbom` | SPDX SBOM file `DesktopApplication.sbom.spdx.json` |
 
 The SBOM is generated with [Microsoft sbom-tool](https://github.com/microsoft/sbom-tool) in SPDX 2.2 format. The job fails if the SBOM file is missing.
+
+After a successful CI run on `main`, [`.github/workflows/notify-orchestrator.yml`](.github/workflows/notify-orchestrator.yml) notifies [Orchestrator](https://github.com/defrances/Orchestrator) to analyze vendor updates against this repository. That workflow needs repository secret `ORCHESTRATOR_PAT`.

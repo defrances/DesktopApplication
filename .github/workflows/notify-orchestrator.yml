@@ -1,0 +1,50 @@
+name: Notify Orchestrator
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  dispatch:
+    name: Dispatch Orchestrator
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Notify Orchestrator after successful main CI
+        env:
+          GH_TOKEN: ${{ secrets.ORCHESTRATOR_PAT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "ORCHESTRATOR_PAT is not configured." >&2
+            exit 1
+          fi
+
+          payload=$(jq -n \
+            --arg event_type "desktop-application-merged" \
+            --arg sha "${{ github.event.workflow_run.head_sha }}" \
+            --arg html_url "${{ github.event.workflow_run.html_url }}" \
+            --arg repository "${{ github.repository }}" \
+            --argjson run_id ${{ github.event.workflow_run.id }} \
+            '{
+              event_type: $event_type,
+              client_payload: {
+                sha: $sha,
+                run_id: $run_id,
+                html_url: $html_url,
+                repository: $repository
+              }
+            }')
+
+          echo "$payload" | gh api repos/defrances/Orchestrator/dispatches --method POST --input -
+          echo "Dispatched desktop-application-merged for ${{ github.event.workflow_run.head_sha }}"
