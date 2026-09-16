@@ -8,6 +8,7 @@ The GitHub Actions pipeline builds a self-contained `win-x64` package and always
 
 - System information panel (user, computer, OS, runtime)
 - Local notes stored in `%AppData%\DesktopApplication\notes.txt`
+- Intentional TLS bypass in `InsecureVendorBulletinClient` (`INTENTIONAL_SKILL_TEST_VULNERABILITY`) to test Orchestrator impact analysis
 
 ## Requirements
 

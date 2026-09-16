@@ -23,6 +23,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
         _notes = _noteStore.Load();
         _status = "Ready";
         SaveCommand = new RelayCommand(SaveNotes);
+        CheckBulletinCommand = new RelayCommand(CheckBulletin);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -65,10 +66,26 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public ICommand SaveCommand { get; }
 
+    public ICommand CheckBulletinCommand { get; }
+
     private void SaveNotes()
     {
         _noteStore.Save(Notes);
         Status = $"Saved at {DateTime.Now:HH:mm:ss}";
+    }
+
+    private void CheckBulletin()
+    {
+        Status = "Fetching vendor bulletin with certificate checks disabled…";
+        try
+        {
+            var body = new InsecureVendorBulletinClient().FetchAsync().GetAwaiter().GetResult();
+            Status = $"Bulletin bytes {body.Length} (insecure TLS path {InsecureVendorBulletinClient.Marker})";
+        }
+        catch (Exception ex)
+        {
+            Status = $"Bulletin fetch failed: {ex.GetType().Name}";
+        }
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
