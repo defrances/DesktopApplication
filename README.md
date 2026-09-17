@@ -1,4 +1,4 @@
-# Desktop Application 
+# Desktop Application
 
 Windows desktop application built with .NET 9 and WPF.
 
