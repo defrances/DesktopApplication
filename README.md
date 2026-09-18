@@ -51,4 +51,4 @@ Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 The SBOM is generated with [Microsoft sbom-tool](https://github.com/microsoft/sbom-tool) in SPDX 2.2 format. The job fails if the SBOM file is missing.
 
-After a successful CI run on `main`, [`.github/workflows/notify-orchestrator.yml`](.github/workflows/notify-orchestrator.yml) starts a run **in** [Orchestrator](https://github.com/defrances/Orchestrator/actions). Orchestrator then starts [FindUpdates `detect.yml`](https://github.com/defrances/FindUpdates/actions/workflows/detect.yml) with `source=live`. That needs repository secret `ORCHESTRATOR_PAT` (see the Orchestrator README for PAT permissions).
+CI on `main` does **not** start Orchestrator. [FindUpdates](https://github.com/defrances/FindUpdates/actions/workflows/detect.yml) runs daily (and manually), then notifies [Orchestrator](https://github.com/defrances/Orchestrator/actions), which checks out this `main` branch and emails analysis results. Orchestrator does not open GitHub Issues.
