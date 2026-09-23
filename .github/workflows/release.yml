@@ -1,0 +1,129 @@
+name: Release package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version (defaults to csproj Version)
+        required: false
+        default: "1.1.0"
+      filter:
+        description: Tests to run before packaging
+        required: false
+        default: all
+        type: choice
+        options:
+          - all
+          - Smoke
+          - Regression
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Build release zip
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore and build
+        run: |
+          dotnet restore DesktopApplication.sln
+          dotnet build DesktopApplication.sln -c Release --no-restore
+
+      - name: Test
+        shell: pwsh
+        run: |
+          $filter = "${{ github.event.inputs.filter }}"
+          New-Item -ItemType Directory -Force -Path artifacts/test | Out-Null
+          if ($filter -and $filter -ne "all") {
+            dotnet test DesktopApplication.sln -c Release --no-build --verbosity normal `
+              --filter "Category=$filter" `
+              --logger "trx;LogFileName=results.trx" `
+              --results-directory artifacts/test
+          } else {
+            dotnet test DesktopApplication.sln -c Release --no-build --verbosity normal `
+              --logger "trx;LogFileName=results.trx" `
+              --results-directory artifacts/test
+          }
+
+      - name: Publish Windows app
+        run: >
+          dotnet publish src/DesktopApplication/DesktopApplication.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          -o artifacts/app
+
+      - name: Install SBOM tool
+        run: dotnet tool restore
+
+      - name: Generate SBOM
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          New-Item -ItemType Directory -Force -Path artifacts/sbom | Out-Null
+          dotnet sbom-tool generate `
+            -b artifacts/app `
+            -bc src `
+            -pn DesktopApplication `
+            -pv $version `
+            -ps DesktopApplication `
+            -nsb https://github.com/defrances/DesktopApplication `
+            -m artifacts/sbom
+          $sbom = Get-ChildItem -Path artifacts/sbom -Recurse -Filter *.spdx.json | Select-Object -First 1
+          if (-not $sbom) { throw "SBOM file was not generated." }
+          Copy-Item $sbom.FullName "artifacts/app/DesktopApplication.sbom.spdx.json"
+
+      - name: Write release notes and test summary
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          $sha = "${{ github.sha }}"
+          @"
+          # DesktopApplication $version
+
+          Self-contained win-x64 package from commit ``$sha``.
+
+          This zip is the application patch/release package. It does not contain
+          Windows OS KBs. Host Schannel and other OS updates stay a station-level
+          recommendation.
+
+          See ``TEST_RESULTS.md`` for the test filter run in this workflow.
+          "@ | Set-Content -Encoding utf8 artifacts/app/RELEASE_NOTES.md
+
+          $trx = Get-ChildItem artifacts/test -Filter *.trx -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($trx) {
+            "Test results file: $($trx.Name)" | Set-Content -Encoding utf8 artifacts/app/TEST_RESULTS.md
+            Get-Content $trx.FullName -TotalCount 20 | Add-Content -Encoding utf8 artifacts/app/TEST_RESULTS.md
+          } else {
+            "No TRX file was produced." | Set-Content -Encoding utf8 artifacts/app/TEST_RESULTS.md
+          }
+
+      - name: Zip release package
+        shell: pwsh
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          New-Item -ItemType Directory -Force -Path artifacts/release | Out-Null
+          $zip = "artifacts/release/DesktopApplication-$version-win-x64.zip"
+          Compress-Archive -Path artifacts/app/* -DestinationPath $zip -Force
+          Write-Host "Wrote $zip"
+
+      - name: Upload release package
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-package
+          path: artifacts/release/DesktopApplication-*-win-x64.zip
+          if-no-files-found: error
