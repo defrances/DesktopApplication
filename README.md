@@ -66,4 +66,4 @@ The SBOM is generated with [Microsoft sbom-tool](https://github.com/microsoft/sb
 
 Manual **Release package** workflow (`.github/workflows/release.yml`) uploads `release-package`: a zip with the exe, SBOM, `RELEASE_NOTES.md`, and `TEST_RESULTS.md`. It does not include Windows OS KBs.
 
-CI on `main` does **not** start Orchestrator. [FindUpdates](https://github.com/defrances/FindUpdates/actions/workflows/detect.yml) runs daily (and manually), then notifies [Orchestrator](https://github.com/defrances/Orchestrator/actions). That one `findupdates-complete` event starts vendor email and product PDLC (docs + vulnerability report → tests → release zip + host KB bundle). Orchestrator does not open GitHub Issues.
+CI on `main` does **not** start Orchestrator. [FindUpdates](https://github.com/defrances/FindUpdates/actions/workflows/detect.yml) runs daily (and manually), then notifies [Orchestrator](https://github.com/defrances/Orchestrator/actions). That `findupdates-complete` event starts one Orchestrator run: vendor email plus product PDLC (docs + vulnerability report → tests → release zip + host KB bundle). Orchestrator does not open GitHub Issues.
