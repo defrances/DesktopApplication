@@ -1,14 +1,50 @@
-# Desktop Application 
+# DesktopApplication
 
-Windows desktop application built with .NET 9 and WPF.
+Windows desktop application (.NET 9, WPF). This repository is the **application under test**. Vendor-update intelligence and the PDLC follow-through live in [FindUpdates](https://github.com/defrances/FindUpdates) and [Orchestrator](https://github.com/defrances/Orchestrator).
 
-The GitHub Actions pipeline builds a self-contained `win-x64` package and always publishes an [SBOM](https://www.cisa.gov/sbom) file with the artifacts.
+GitHub Actions builds a self-contained `win-x64` package and always publishes an [SBOM](https://www.cisa.gov/sbom) with the artifacts. CI on `main` does **not** start Orchestrator.
 
-## Features
+## What the app does
 
 - System information panel (user, computer, OS, runtime)
-- Local notes stored in `%AppData%\DesktopApplication\notes.txt`
-- Intentional TLS bypass in `InsecureVendorBulletinClient` (`INTENTIONAL_SKILL_TEST_VULNERABILITY`) to test Orchestrator impact analysis
+- Local notes in `%AppData%\DesktopApplication\notes.txt`
+- Vendor bulletin HTTPS check (`InsecureVendorBulletinClient` / `CheckBulletinCommand`)
+- Notes export (`NoteStore.ExportCopy`)
+
+## Security notes (code vs docs)
+
+TLS validation on `main` requires `SslPolicyErrors.None` (marker `TLS_CERTIFICATE_VALIDATED`). Regression `TC-REG-TLS-CALLBACK` expects an invalid chain to be rejected.
+
+`docs/vulnerability-report.md` and `docs/mds2.md` still describe VR-TLS-001 as open / MDS2-TLS not met. That corpus is the **PDLC input** and is intentionally not rewritten when the code changes. Orchestrator scores countermeasures from `docs/` plus the tree on `main`; AI may mark a finding present even when the markdown still says open.
+
+`NoteStore.ExportCopy` is an intentional path-traversal test (`INTENTIONAL_SKILL_TEST_VULNERABILITY`): the destination name is not constrained, so `..` can write outside the notes folder. It is **not** listed in `docs/vulnerability-report.md`.
+
+The published exe is `--self-contained true`. A host Windows / .NET KB does not patch the runtime inside the zip.
+
+## Role in the three-repo chain
+
+```text
+FindUpdates detect (daily / manual)
+  → station_report (which OS KB applies to which workstation)
+  → Orchestrator Vendor impact and PDLC
+      → vendor-impact email (KB vs this app on main)
+      → PDLC score from docs/ + main
+      → Smoke/Regression on this tree
+      → app zip + Windows KB bundle (manifest, not .msu)
+```
+
+This repository does not poll MSRC and does not send the results email.
+
+## Product documentation (PDLC corpus)
+
+Orchestrator copies these files into `inputs/` on each follow-through run.
+
+| Doc | Role |
+| --- | --- |
+| [docs/architecture.md](docs/architecture.md) | Process boundaries, modules, host vs bundled runtime |
+| [docs/mds2.md](docs/mds2.md) | Short security disclosure (MDS2-lite) |
+| [docs/test-plan.md](docs/test-plan.md) | Unit / smoke / regression matrix |
+| [docs/vulnerability-report.md](docs/vulnerability-report.md) | Product findings for the PDLC skill (may lag `main`) |
 
 ## Requirements
 
@@ -23,18 +59,9 @@ dotnet build DesktopApplication.sln -c Release
 dotnet run --project src/DesktopApplication/DesktopApplication.csproj
 ```
 
-## Product documentation (PDLC corpus)
-
-| Doc | Role |
-| --- | --- |
-| [docs/architecture.md](docs/architecture.md) | Process boundaries, modules, host vs bundled runtime |
-| [docs/mds2.md](docs/mds2.md) | Short security disclosure (MDS2-lite) |
-| [docs/test-plan.md](docs/test-plan.md) | Unit / smoke / regression matrix |
-| [docs/vulnerability-report.md](docs/vulnerability-report.md) | Product findings for the PDLC skill |
-
 ## Tests
 
-Categories are xUnit traits `Category=Unit|Smoke|Regression`. Default CI runs all.
+Categories are xUnit traits `Category=Unit|Smoke|Regression`. Default CI runs all. Orchestrator re-runs Smoke + Regression as a release gate.
 
 ```powershell
 dotnet test DesktopApplication.sln
@@ -59,11 +86,11 @@ Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 | Artifact | Contents |
 | --- | --- |
-| `DesktopApplication-win-x64` | Application (`DesktopApplication.exe`) and `DesktopApplication.sbom.spdx.json` |
-| `sbom` | SPDX SBOM file `DesktopApplication.sbom.spdx.json` |
+| `DesktopApplication-win-x64` | `DesktopApplication.exe` and `DesktopApplication.sbom.spdx.json` |
+| `sbom` | SPDX SBOM `DesktopApplication.sbom.spdx.json` |
 
-The SBOM is generated with [Microsoft sbom-tool](https://github.com/microsoft/sbom-tool) in SPDX 2.2 format. The job fails if the SBOM file is missing.
+The SBOM is generated with [Microsoft sbom-tool](https://github.com/microsoft/sbom-tool) (SPDX 2.2). The job fails if the file is missing.
 
-Manual **Release package** workflow (`.github/workflows/release.yml`) uploads `release-package`: a zip with the exe, SBOM, `RELEASE_NOTES.md`, and `TEST_RESULTS.md`. It does not include Windows OS KBs.
+Manual **Release package** (`.github/workflows/release.yml`) uploads `release-package`: exe, SBOM, `RELEASE_NOTES.md`, `TEST_RESULTS.md`. It does not include Windows OS KBs.
 
-CI on `main` does **not** start Orchestrator. [FindUpdates](https://github.com/defrances/FindUpdates/actions/workflows/detect.yml) runs daily (and manually), then notifies [Orchestrator](https://github.com/defrances/Orchestrator/actions). That `findupdates-complete` event starts one Orchestrator run: vendor email plus product PDLC (docs + vulnerability report → tests → release zip + host KB bundle). Orchestrator does not open GitHub Issues.
+Orchestrator follow-through: [FindUpdates detect](https://github.com/defrances/FindUpdates/actions/workflows/detect.yml) then [Vendor impact and PDLC](https://github.com/defrances/Orchestrator/actions). GitHub Issues are not created for vendor clusters.
