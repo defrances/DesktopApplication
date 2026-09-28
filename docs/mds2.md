@@ -10,7 +10,7 @@ and not a 510(k) submission.
 | MDS2-TLS | Cryptography / TLS | **not met** | `AcceptAnyServerCertificate` always returns `true`. The process uses host Schannel for the handshake, then **discards** certificate validation results. Marker: `INTENTIONAL_SKILL_TEST_VULNERABILITY`. |
 | MDS2-DATA | Data at rest | met | Local notes file only; no PHI; no remote storage. |
 | MDS2-AUTH | Authentication | n/a | Single-user desktop process; Windows session identity only. |
-| MDS2-PATCH | Patch model | met | New self-contained `win-x64` exe + SPDX SBOM. Host OS KBs are recommended separately and are not packaged with the app. |
+| MDS2-PATCH | Patch model | met | New self-contained `win-x64` exe + SPDX SBOM. Host OS KBs are recommended separately and are not packaged with the app. For **UVCS configuration 1**, patch management is a product design-control activity: it belongs in the design/config spec and in [docs/security-risk-management.md](security-risk-management.md), not in a tool-validation procedure. |
 | MDS2-AUDIT | Audit | partial | No application audit log. Build evidence is CI artifacts (exe, SBOM, test output). |
 | MDS2-SBOM | Software bill of materials | met | SPDX 2.2 generated in CI (`microsoft.sbom.dotnettool`). |
 

@@ -42,7 +42,8 @@ Orchestrator copies these files into `inputs/` on each follow-through run.
 | Doc | Role |
 | --- | --- |
 | [docs/architecture.md](docs/architecture.md) | Process boundaries, modules, host vs bundled runtime |
-| [docs/mds2.md](docs/mds2.md) | Short security disclosure (MDS2-lite) |
+| [docs/mds2.md](docs/mds2.md) | Short security disclosure (MDS2-lite), including patch model |
+| [docs/security-risk-management.md](docs/security-risk-management.md) | Product patch management under design control |
 | [docs/test-plan.md](docs/test-plan.md) | Unit / smoke / regression matrix |
 | [docs/vulnerability-report.md](docs/vulnerability-report.md) | Product findings for the PDLC skill (may lag `main`) |
 
