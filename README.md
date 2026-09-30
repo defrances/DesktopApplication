@@ -1,6 +1,6 @@
-# DesktopApplication
+# Host Application
 
-Windows desktop application (.NET 9, WPF). This repository is the **application under test**. Vendor-update intelligence and the PDLC follow-through live in [FindUpdates](https://github.com/defrances/FindUpdates) and [Orchestrator](https://github.com/defrances/Orchestrator).
+Windows host application (.NET 9, WPF). This repository is the **application under test**. Vendor-update intelligence and the PDLC follow-through live in [FindUpdates](https://github.com/defrances/FindUpdates) and [Orchestrator](https://github.com/defrances/Orchestrator). The GitHub repository remains `defrances/DesktopApplication`.
 
 GitHub Actions builds a self-contained `win-x64` package and always publishes an [SBOM](https://www.cisa.gov/sbom) with the artifacts. CI on `main` does **not** start Orchestrator.
 

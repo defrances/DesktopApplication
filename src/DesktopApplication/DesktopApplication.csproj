@@ -10,8 +10,8 @@
     <RootNamespace>DesktopApplication</RootNamespace>
     <AssemblyName>DesktopApplication</AssemblyName>
     <Version>1.0.0</Version>
-    <Product>DesktopApplication</Product>
-    <Description>Windows desktop application.</Description>
+    <Product>Host Application</Product>
+    <Description>Windows host application.</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -32,9 +32,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
 
     public SystemInformation SystemInformation { get; }
 
-    public string Title => "Desktop Application";
+    public string Title => "Host Application";
 
-    public string Subtitle => "Windows desktop client";
+    public string Subtitle => "Windows host client";
 
     public string Notes
     {

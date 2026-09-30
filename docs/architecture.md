@@ -1,11 +1,11 @@
-# DesktopApplication architecture
+# Host Application architecture
 
 Product process boundaries for PDLC analysis. This is the application under
 analysis on branch `main`.
 
 ## Process
 
-DesktopApplication is a Windows WPF client (`OutputType=WinExe`,
+Host Application is a Windows WPF client (`OutputType=WinExe`,
 `net9.0-windows`, `UseWPF`). CI publishes a **self-contained** `win-x64`
 single-file exe. The published process embeds `Microsoft.NETCore.App` and
 `Microsoft.WindowsDesktop.App`. It does **not** embed the host TLS stack
