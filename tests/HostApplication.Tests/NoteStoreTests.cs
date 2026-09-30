@@ -1,6 +1,6 @@
-using DesktopApplication.Core;
+using HostApplication.Core;
 
-namespace DesktopApplication.Tests;
+namespace HostApplication.Tests;
 
 public sealed class NoteStoreTests
 {
@@ -20,7 +20,7 @@ public sealed class NoteStoreTests
     [Trait("TestId", "TC-SMOKE-NOTES")]
     public void Save_ThenLoad_ReturnsSavedContent()
     {
-        var path = Path.Combine(Path.GetTempPath(), "DesktopApplicationTests", Guid.NewGuid().ToString("N"), "notes.txt");
+        var path = Path.Combine(Path.GetTempPath(), "HostApplicationTests", Guid.NewGuid().ToString("N"), "notes.txt");
         var store = new NoteStore(path);
 
         try
@@ -51,7 +51,7 @@ public sealed class NoteStoreTests
     [Trait("TestId", "TC-UNIT-NOTES-EXPORT")]
     public void ExportCopy_WritesOutsideTheNotesDirectory_WhenNameContainsParentSegments()
     {
-        var folder = Path.Combine(Path.GetTempPath(), "DesktopApplicationTests", Guid.NewGuid().ToString("N"));
+        var folder = Path.Combine(Path.GetTempPath(), "HostApplicationTests", Guid.NewGuid().ToString("N"));
         var path = Path.Combine(folder, "notes.txt");
         var store = new NoteStore(path);
         store.Save("secret-note");

@@ -1,13 +1,13 @@
 # Host Application
 
-Windows host application (.NET 9, WPF). This repository is the **application under test**. Vendor-update intelligence and the PDLC follow-through live in [FindUpdates](https://github.com/defrances/FindUpdates) and [Orchestrator](https://github.com/defrances/Orchestrator). The GitHub repository remains `defrances/DesktopApplication`.
+Windows host application (.NET 9, WPF). This repository is the **application under test**. Vendor-update intelligence and the PDLC follow-through live in [FindUpdates](https://github.com/defrances/FindUpdates) and [Orchestrator](https://github.com/defrances/Orchestrator). The GitHub repository is `defrances/HostApplication`.
 
 GitHub Actions builds a self-contained `win-x64` package and always publishes an [SBOM](https://www.cisa.gov/sbom) with the artifacts. CI on `main` does **not** start Orchestrator.
 
 ## What the app does
 
 - System information panel (user, computer, OS, runtime)
-- Local notes in `%AppData%\DesktopApplication\notes.txt`
+- Local notes in `%AppData%\HostApplication\notes.txt`
 - Vendor bulletin HTTPS check (`InsecureVendorBulletinClient` / `CheckBulletinCommand`)
 - Notes export (`NoteStore.ExportCopy`)
 
@@ -56,8 +56,8 @@ Orchestrator copies these files into `inputs/` on each follow-through run.
 
 ```powershell
 dotnet restore
-dotnet build DesktopApplication.sln -c Release
-dotnet run --project src/DesktopApplication/DesktopApplication.csproj
+dotnet build HostApplication.sln -c Release
+dotnet run --project src/HostApplication/HostApplication.csproj
 ```
 
 ## Tests
@@ -65,15 +65,15 @@ dotnet run --project src/DesktopApplication/DesktopApplication.csproj
 Categories are xUnit traits `Category=Unit|Smoke|Regression`. Default CI runs all. Orchestrator re-runs Smoke + Regression as a release gate.
 
 ```powershell
-dotnet test DesktopApplication.sln
-dotnet test DesktopApplication.sln --filter "Category=Smoke"
-dotnet test DesktopApplication.sln --filter "Category=Regression"
+dotnet test HostApplication.sln
+dotnet test HostApplication.sln --filter "Category=Smoke"
+dotnet test HostApplication.sln --filter "Category=Regression"
 ```
 
 ## Publish
 
 ```powershell
-dotnet publish src/DesktopApplication/DesktopApplication.csproj `
+dotnet publish src/HostApplication/HostApplication.csproj `
   -c Release `
   -r win-x64 `
   --self-contained true `
@@ -87,8 +87,8 @@ Workflow: [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 | Artifact | Contents |
 | --- | --- |
-| `DesktopApplication-win-x64` | `DesktopApplication.exe` and `DesktopApplication.sbom.spdx.json` |
-| `sbom` | SPDX SBOM `DesktopApplication.sbom.spdx.json` |
+| `HostApplication-win-x64` | `HostApplication.exe` and `HostApplication.sbom.spdx.json` |
+| `sbom` | SPDX SBOM `HostApplication.sbom.spdx.json` |
 
 The SBOM is generated with [Microsoft sbom-tool](https://github.com/microsoft/sbom-tool) (SPDX 2.2). The job fails if the file is missing.
 

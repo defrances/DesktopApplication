@@ -12,9 +12,9 @@ single-file exe. The published process embeds `Microsoft.NETCore.App` and
 (Schannel), Win32k, DWM, or NTFS.
 
 ```
-DesktopApplication.exe
-├── UI (WPF)          src/DesktopApplication
-└── Core (net9.0)     src/DesktopApplication.Core
+HostApplication.exe
+├── UI (WPF)          src/HostApplication
+└── Core (net9.0)     src/HostApplication.Core
       ├── NoteStore
       ├── SystemInformationProvider
       └── InsecureVendorBulletinClient
@@ -24,11 +24,11 @@ DesktopApplication.exe
 
 | Module | Path | Responsibility |
 | --- | --- | --- |
-| Shell / window | `src/DesktopApplication/MainWindow.xaml` | Two-panel UI, DPI via `app.manifest` (`PerMonitorV2`) |
-| View model | `src/DesktopApplication/MainViewModel.cs` | Notes save, `CheckBulletinCommand` |
-| Notes | `src/DesktopApplication.Core/NoteStore.cs` | `%AppData%\DesktopApplication\notes.txt` |
-| System info | `src/DesktopApplication.Core/SystemInformation.cs` | User, machine, OS, runtime strings |
-| Vendor bulletin | `src/DesktopApplication.Core/InsecureVendorBulletinClient.cs` | HTTPS GET to MSRC; **currently trusts every server certificate** |
+| Shell / window | `src/HostApplication/MainWindow.xaml` | Two-panel UI, DPI via `app.manifest` (`PerMonitorV2`) |
+| View model | `src/HostApplication/MainViewModel.cs` | Notes save, `CheckBulletinCommand` |
+| Notes | `src/HostApplication.Core/NoteStore.cs` | `%AppData%\HostApplication\notes.txt` |
+| System info | `src/HostApplication.Core/SystemInformation.cs` | User, machine, OS, runtime strings |
+| Vendor bulletin | `src/HostApplication.Core/InsecureVendorBulletinClient.cs` | HTTPS GET to MSRC; **currently trusts every server certificate** |
 | Publish | `.github/workflows/ci.yml` | `dotnet publish --self-contained true -r win-x64` + SPDX SBOM |
 
 ## Trust boundary

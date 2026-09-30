@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace DesktopApplication.Core;
+namespace HostApplication.Core;
 
 public sealed record SystemInformation(
     string UserName,

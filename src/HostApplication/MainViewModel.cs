@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using DesktopApplication.Core;
+using HostApplication.Core;
 
-namespace DesktopApplication;
+namespace HostApplication;
 
 public sealed class MainViewModel : INotifyPropertyChanged
 {

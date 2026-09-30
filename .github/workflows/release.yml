@@ -35,8 +35,8 @@ jobs:
 
       - name: Restore and build
         run: |
-          dotnet restore DesktopApplication.sln
-          dotnet build DesktopApplication.sln -c Release --no-restore
+          dotnet restore HostApplication.sln
+          dotnet build HostApplication.sln -c Release --no-restore
 
       - name: Test
         shell: pwsh
@@ -44,19 +44,19 @@ jobs:
           $filter = "${{ github.event.inputs.filter }}"
           New-Item -ItemType Directory -Force -Path artifacts/test | Out-Null
           if ($filter -and $filter -ne "all") {
-            dotnet test DesktopApplication.sln -c Release --no-build --verbosity normal `
+            dotnet test HostApplication.sln -c Release --no-build --verbosity normal `
               --filter "Category=$filter" `
               --logger "trx;LogFileName=results.trx" `
               --results-directory artifacts/test
           } else {
-            dotnet test DesktopApplication.sln -c Release --no-build --verbosity normal `
+            dotnet test HostApplication.sln -c Release --no-build --verbosity normal `
               --logger "trx;LogFileName=results.trx" `
               --results-directory artifacts/test
           }
 
       - name: Publish Windows app
         run: >
-          dotnet publish src/DesktopApplication/DesktopApplication.csproj
+          dotnet publish src/HostApplication/HostApplication.csproj
           -c Release
           -r win-x64
           --self-contained true
@@ -78,14 +78,14 @@ jobs:
           dotnet sbom-tool generate `
             -b artifacts/app `
             -bc src `
-            -pn DesktopApplication `
+            -pn HostApplication `
             -pv $version `
-            -ps DesktopApplication `
-            -nsb https://github.com/defrances/DesktopApplication `
+            -ps HostApplication `
+            -nsb https://github.com/defrances/HostApplication `
             -m artifacts/sbom
           $sbom = Get-ChildItem -Path artifacts/sbom -Recurse -Filter *.spdx.json | Select-Object -First 1
           if (-not $sbom) { throw "SBOM file was not generated." }
-          Copy-Item $sbom.FullName "artifacts/app/DesktopApplication.sbom.spdx.json"
+          Copy-Item $sbom.FullName "artifacts/app/HostApplication.sbom.spdx.json"
 
       - name: Write release notes and test summary
         shell: pwsh
@@ -93,7 +93,7 @@ jobs:
           $version = "${{ github.event.inputs.version }}"
           $sha = "${{ github.sha }}"
           @"
-          # DesktopApplication $version
+          # HostApplication $version
 
           Self-contained win-x64 package from commit ``$sha``.
 
@@ -117,7 +117,7 @@ jobs:
         run: |
           $version = "${{ github.event.inputs.version }}"
           New-Item -ItemType Directory -Force -Path artifacts/release | Out-Null
-          $zip = "artifacts/release/DesktopApplication-$version-win-x64.zip"
+          $zip = "artifacts/release/HostApplication-$version-win-x64.zip"
           Compress-Archive -Path artifacts/app/* -DestinationPath $zip -Force
           Write-Host "Wrote $zip"
 
@@ -125,5 +125,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-package
-          path: artifacts/release/DesktopApplication-*-win-x64.zip
+          path: artifacts/release/HostApplication-*-win-x64.zip
           if-no-files-found: error

@@ -5,7 +5,7 @@ and not a 510(k) submission.
 
 | ID | Topic | Status | Statement |
 | --- | --- | --- | --- |
-| MDS2-ID | Identification | met | Windows WPF client, product Host Application, assembly `DesktopApplication`, version from csproj. |
+| MDS2-ID | Identification | met | Windows WPF client, product Host Application, assembly `HostApplication`, version from csproj. |
 | MDS2-NET | Network connections | met | One optional outbound HTTPS GET (`InsecureVendorBulletinClient`). No inbound ports. |
 | MDS2-TLS | Cryptography / TLS | **not met** | `AcceptAnyServerCertificate` always returns `true`. The process uses host Schannel for the handshake, then **discards** certificate validation results. Marker: `INTENTIONAL_SKILL_TEST_VULNERABILITY`. |
 | MDS2-DATA | Data at rest | met | Local notes file only; no PHI; no remote storage. |

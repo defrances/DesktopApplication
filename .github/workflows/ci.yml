@@ -35,10 +35,10 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore
-        run: dotnet restore DesktopApplication.sln
+        run: dotnet restore HostApplication.sln
 
       - name: Build
-        run: dotnet build DesktopApplication.sln -c Release --no-restore
+        run: dotnet build HostApplication.sln -c Release --no-restore
 
       - name: Test
         shell: pwsh
@@ -46,19 +46,19 @@ jobs:
           $filter = "${{ github.event.inputs.filter || 'all' }}"
           New-Item -ItemType Directory -Force -Path artifacts/test | Out-Null
           if ($filter -and $filter -ne "all") {
-            dotnet test DesktopApplication.sln -c Release --no-build --verbosity normal `
+            dotnet test HostApplication.sln -c Release --no-build --verbosity normal `
               --filter "Category=$filter" `
               --logger "trx;LogFileName=results.trx" `
               --results-directory artifacts/test
           } else {
-            dotnet test DesktopApplication.sln -c Release --no-build --verbosity normal `
+            dotnet test HostApplication.sln -c Release --no-build --verbosity normal `
               --logger "trx;LogFileName=results.trx" `
               --results-directory artifacts/test
           }
 
       - name: Publish Windows app
         run: >
-          dotnet publish src/DesktopApplication/DesktopApplication.csproj
+          dotnet publish src/HostApplication/HostApplication.csproj
           -c Release
           -r win-x64
           --self-contained true
@@ -79,10 +79,10 @@ jobs:
           dotnet sbom-tool generate `
             -b artifacts/app `
             -bc src `
-            -pn DesktopApplication `
+            -pn HostApplication `
             -pv 1.0.0 `
-            -ps DesktopApplication `
-            -nsb https://github.com/defrances/DesktopApplication `
+            -ps HostApplication `
+            -nsb https://github.com/defrances/HostApplication `
             -m artifacts/sbom
 
       - name: Collect SBOM file
@@ -95,10 +95,10 @@ jobs:
           }
 
           New-Item -ItemType Directory -Force -Path artifacts/sbom-file | Out-Null
-          Copy-Item $sbom.FullName "artifacts/sbom-file/DesktopApplication.sbom.spdx.json"
-          Copy-Item $sbom.FullName "artifacts/app/DesktopApplication.sbom.spdx.json"
+          Copy-Item $sbom.FullName "artifacts/sbom-file/HostApplication.sbom.spdx.json"
+          Copy-Item $sbom.FullName "artifacts/app/HostApplication.sbom.spdx.json"
 
-          if (-not (Test-Path "artifacts/app/DesktopApplication.sbom.spdx.json")) {
+          if (-not (Test-Path "artifacts/app/HostApplication.sbom.spdx.json")) {
             throw "SBOM file is missing from application artifacts."
           }
 
@@ -107,7 +107,7 @@ jobs:
       - name: Upload application artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DesktopApplication-win-x64
+          name: HostApplication-win-x64
           path: artifacts/app/**
           if-no-files-found: error
 
@@ -115,7 +115,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sbom
-          path: artifacts/sbom-file/DesktopApplication.sbom.spdx.json
+          path: artifacts/sbom-file/HostApplication.sbom.spdx.json
           if-no-files-found: error
 
       - name: Upload test results

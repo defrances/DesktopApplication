@@ -1,4 +1,4 @@
-namespace DesktopApplication.Core;
+namespace HostApplication.Core;
 
 public sealed class NoteStore
 {
@@ -13,7 +13,7 @@ public sealed class NoteStore
     public static string DefaultPath =>
         Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "DesktopApplication",
+            "HostApplication",
             "notes.txt");
 
     public string Load()

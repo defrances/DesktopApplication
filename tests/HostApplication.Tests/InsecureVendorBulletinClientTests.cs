@@ -1,7 +1,7 @@
 using System.Net.Security;
-using DesktopApplication.Core;
+using HostApplication.Core;
 
-namespace DesktopApplication.Tests;
+namespace HostApplication.Tests;
 
 public sealed class InsecureVendorBulletinClientTests
 {

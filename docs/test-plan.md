@@ -18,10 +18,10 @@ or `filter=all`.
 ## Filters
 
 ```powershell
-dotnet test DesktopApplication.sln --filter "Category=Smoke"
-dotnet test DesktopApplication.sln --filter "Category=Regression"
-dotnet test DesktopApplication.sln --filter "Category=Unit"
-dotnet test DesktopApplication.sln
+dotnet test HostApplication.sln --filter "Category=Smoke"
+dotnet test HostApplication.sln --filter "Category=Regression"
+dotnet test HostApplication.sln --filter "Category=Unit"
+dotnet test HostApplication.sln
 ```
 
 There are no UI automation tests. Smoke and regression here are Core xUnit

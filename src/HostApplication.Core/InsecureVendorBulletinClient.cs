@@ -1,7 +1,7 @@
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
-namespace DesktopApplication.Core;
+namespace HostApplication.Core;
 
 /// <summary>
 /// Downloads a vendor bulletin over HTTPS and requires a valid server certificate.

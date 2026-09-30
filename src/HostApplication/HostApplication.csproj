@@ -7,15 +7,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <RootNamespace>DesktopApplication</RootNamespace>
-    <AssemblyName>DesktopApplication</AssemblyName>
+    <RootNamespace>HostApplication</RootNamespace>
+    <AssemblyName>HostApplication</AssemblyName>
     <Version>1.0.0</Version>
     <Product>Host Application</Product>
     <Description>Windows host application.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DesktopApplication.Core\DesktopApplication.Core.csproj" />
+    <ProjectReference Include="..\HostApplication.Core\HostApplication.Core.csproj" />
   </ItemGroup>
 
 </Project>

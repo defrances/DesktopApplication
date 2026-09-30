@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace DesktopApplication;
+namespace HostApplication;
 
 public partial class App : Application
 {
